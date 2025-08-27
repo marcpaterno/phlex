@@ -14,7 +14,10 @@ def f2(x: int, y: Optional[int], z: Optional[int]) -> int:
     if y is None and z is None:
         return x
     if z is None:
+        assert y is not None
         return x + y
+    assert y is not None
+    assert z is not None
     return x + y + z
 
 
