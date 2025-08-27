@@ -72,21 +72,38 @@ def test_window_generator():
 
 def test_make_pairs_empty():
     xs = []
-    ys = list(w.make_pairs(xs))
+    ys = list(w.make_pairs(xs, leading_nulls=0, trailing_nulls=0))
+    assert len(ys) == 0
+    ys = list(w.make_pairs(xs, leading_nulls=0, trailing_nulls=1))
+    assert len(ys) == 0
+    ys = list(w.make_pairs(xs, leading_nulls=1, trailing_nulls=0))
+    assert len(ys) == 0
+    ys = list(w.make_pairs(xs, leading_nulls=1, trailing_nulls=1))
     assert len(ys) == 0
 
 
 def test_make_pairs_single():
     xs = [1]
-    ys = list(w.make_pairs(xs))
-    assert len(ys) == 1
-    assert ys[0] == (1, None)
+    ys = list(w.make_pairs(xs, leading_nulls=0, trailing_nulls=0))
+    assert len(ys) == 0
+    ys = list(w.make_pairs(xs, leading_nulls=0, trailing_nulls=1))
+    assert ys == [(1, None)]
+    ys = list(w.make_pairs(xs, leading_nulls=1, trailing_nulls=0))
+    assert ys == [(None, 1)]
+    ys = list(w.make_pairs(xs, leading_nulls=1, trailing_nulls=1))
+    assert ys == [(None, 1), (1, None)]
 
 
 def test_make_pairs_list():
-    xs = [1, 2, 3, 4, 5]
-    ys = list(w.make_pairs(xs))
-    assert ys == [(1, 2), (2, 3), (3, 4), (4, 5), (5, None)]
+    xs = [1, 2, 3]
+    ys = list(w.make_pairs(xs, leading_nulls=0, trailing_nulls=0))
+    assert ys == [(1, 2), (2, 3)]
+    ys = list(w.make_pairs(xs, leading_nulls=0, trailing_nulls=1))
+    assert ys == [(1, 2), (2, 3), (3, None)]
+    ys = list(w.make_pairs(xs, leading_nulls=1, trailing_nulls=0))
+    assert ys == [(None, 1), (1, 2), (2, 3)]
+    ys = list(w.make_pairs(xs, leading_nulls=1, trailing_nulls=1))
+    assert ys == [(None, 1), (1, 2), (2, 3), (3, None)]
 
 
 def test_make_triplets_empty():

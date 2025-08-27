@@ -45,15 +45,20 @@ def make_tuples(
 
 def make_pairs(
     xs: Generator[T, None, None],
+    leading_nulls: int = 0,
+    trailing_nulls: int = 0,
 ) -> Generator[tuple[T | None, T | None], None, None]:
     """Create pairs of elements from the list."""
     xs = iter(xs)
     try:
         previous: T = next(xs)
+        if leading_nulls == 1:
+            yield (None, previous)
         for current in xs:
             yield (previous, current)
             previous = current
-        yield (previous, None)
+        if trailing_nulls == 1:
+            yield (previous, None)
     except StopIteration:
         pass
 
