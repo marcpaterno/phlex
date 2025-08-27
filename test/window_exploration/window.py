@@ -2,9 +2,13 @@ from collections import defaultdict
 from itertools import zip_longest
 from typing import Callable, Generator, Protocol, TypeVar, Sequence
 
+class HasLabel(Protocol):
+    label: int
+
 # Type variables for use in protocols and type annotations.
 T = TypeVar("T")
 S = TypeVar("S")
+TLabeled = TypeVar("TLabeled", bound="HasLabel")
 
 
 class WindowGenerator(Protocol[T]):
@@ -21,8 +25,8 @@ class WindowGenerator(Protocol[T]):
     # Note that the type annotation for a generator is:
     # Generator[YieldType, SendType, ReturnType]..
     def __call__(
-        self, N: int, xs: Generator[T, None, None]
-    ) -> Generator[tuple[T, ...], None, None]: ...
+        self, xs: Generator[T, None, None]
+    ) -> Generator[tuple[T | None, ...], None, None]: ...
 
 
 # TODO: make_tuples relies on the fact that it is operating
@@ -32,13 +36,16 @@ class WindowGenerator(Protocol[T]):
 # at a 'tag' attribute of each element, and which form windows
 # by matching elements with matching tags -- where the definition
 # of 'match' is left to the a user-specified function.
-def make_tuples(xs: Generator[T, None, None], size: int) -> Generator[tuple[T|None, ...], None, None]:
+def make_tuples(
+    xs: Generator[T, None, None], size: int
+) -> Generator[tuple[T | None, ...], None, None]:
     """Create tuples of a given size from the list."""
     pass
 
 
-
-def make_pairs(xs: Generator[T, None, None]) -> Generator[tuple[T, T|None], None, None]:
+def make_pairs(
+    xs: Generator[T, None, None],
+) -> Generator[tuple[T | None, T | None], None, None]:
     """Create pairs of elements from the list."""
     xs = iter(xs)
     try:
@@ -50,7 +57,10 @@ def make_pairs(xs: Generator[T, None, None]) -> Generator[tuple[T, T|None], None
     except StopIteration:
         pass
 
-def make_triplets(xs: Generator[T, None, None]) -> Generator[tuple[T, T|None, T|None], None, None]:
+
+def make_triplets(
+    xs: Generator[T, None, None],
+) -> Generator[tuple[T, T | None, T | None], None, None]:
     """Create triplets of elements from the list."""
     xs = iter(xs)
     try:
@@ -92,7 +102,7 @@ def window(
 #   - the number of trailing nulls allowed
 # Question: should these options be passed as argument to window_generator or
 # should they be features of the matcher function?
-def window_generator(xs: Generator[T, None, None], matcher):
+def window_generator(xs: Generator[TLabeled, None, None], matcher):
     """Generate a sequence of windows from the input.
 
     This version is very limited. It only creates pairs (not longer tuples).
@@ -109,8 +119,8 @@ def window_generator(xs: Generator[T, None, None], matcher):
         Elements of each tuple will be adjacent, with regards to their labels.
         The second element of the tuple may be None.
     """
-    cache = []  # cache of elements
-    use_count = defaultdict(int)  # dict of index -> use count
+    cache: list[TLabeled] = []  # cache of elements
+    use_count: dict[int, int] = defaultdict(int)  # dict of index -> use count
     for x in xs:
         for y in cache:
             if matcher(x.label, y.label):
