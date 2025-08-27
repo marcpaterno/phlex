@@ -65,3 +65,42 @@ def test_window_generator():
         else:
             assert a.label + 1 == b.label
     assert n_pairs == len(xs)
+
+def test_make_pairs_empty():
+    xs = []
+    ys = list(w.make_pairs(xs))
+    assert len(ys) == 0
+
+def test_make_pairs_single():
+    xs = [1]
+    ys = list(w.make_pairs(xs))
+    assert len(ys) == 1
+    assert ys[0] == (1, None)
+
+def test_make_pairs_list():
+    xs = [1, 2, 3, 4, 5]
+    ys = list(w.make_pairs(xs))
+    assert ys == [(1, 2), (2, 3), (3, 4), (4, 5), (5, None)]
+
+def test_make_triplets_empty():
+    xs = []
+    ys = list(w.make_triplets(xs))
+    assert len(ys) == 0
+
+def test_make_triplets_single():
+    xs = [1]
+    ys = list(w.make_triplets(xs))
+    assert len(ys) == 1
+    assert ys[0] == (1, None, None)
+
+def test_make_triplets_double():
+    xs = [1, 2]
+    ys = list(w.make_triplets(xs))
+    assert len(ys) == 2
+    assert ys[0] == (1, 2, None)
+    assert ys[1] == (2, None, None)
+
+def test_make_triplets_list():
+    xs = [1, 2, 3, 4, 5]
+    ys = list(w.make_triplets(xs))
+    assert ys == [(1, 2, 3), (2, 3, 4), (3, 4, 5), (4, 5, None), (5, None, None)]

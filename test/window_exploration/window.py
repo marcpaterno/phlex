@@ -1,6 +1,6 @@
 from collections import defaultdict
 from itertools import zip_longest
-from typing import Callable, Generator, Protocol, TypeVar
+from typing import Callable, Generator, Protocol, TypeVar, Sequence
 
 # Type variables for use in protocols and type annotations.
 T = TypeVar("T")
@@ -32,19 +32,41 @@ class WindowGenerator(Protocol[T]):
 # at a 'tag' attribute of each element, and which form windows
 # by matching elements with matching tags -- where the definition
 # of 'match' is left to the a user-specified function.
-def make_tuples(xs, size: int):
+def make_tuples(xs: Generator[T, None, None], size: int) -> Generator[tuple[T|None, ...], None, None]:
     """Create tuples of a given size from the list."""
-    return zip_longest(*[xs[i:] for i in range(size)])
+    pass
 
 
-def make_pairs(xs):
+
+def make_pairs(xs: Generator[T, None, None]) -> Generator[tuple[T, T|None], None, None]:
     """Create pairs of elements from the list."""
-    return make_tuples(xs, 2)
+    xs = iter(xs)
+    try:
+        previous: T = next(xs)
+        for current in xs:
+            yield (previous, current)
+            previous = current
+        yield (previous, None)
+    except StopIteration:
+        pass
 
-
-def make_triplets(xs):
+def make_triplets(xs: Generator[T, None, None]) -> Generator[tuple[T, T|None, T|None], None, None]:
     """Create triplets of elements from the list."""
-    return make_tuples(xs, 3)
+    xs = iter(xs)
+    try:
+        older: T = next(xs)
+        try:
+            old: T = next(xs)
+            for current in xs:
+                yield (older, old, current)
+                older = old
+                old = current
+            yield (older, old, None)
+            yield (old, None, None)
+        except StopIteration:
+            yield (older, None, None)
+    except StopIteration:
+        pass
 
 
 def window(
@@ -70,7 +92,7 @@ def window(
 #   - the number of trailing nulls allowed
 # Question: should these options be passed as argument to window_generator or
 # should they be features of the matcher function?
-def window_generator(xs, matcher):
+def window_generator(xs: Generator[T, None, None], matcher):
     """Generate a sequence of windows from the input.
 
     This version is very limited. It only creates pairs (not longer tuples).
