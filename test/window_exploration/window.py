@@ -43,26 +43,50 @@ def make_tuples(
     pass
 
 
+def make_tuples(
+    xs: Generator[T, None, None],
+    n: int,
+    leading_nulls: int = 0,
+    trailing_nulls: int = 0,
+) -> Generator[tuple[T | None, ...], None, None]:
+    """Create tuples of the given length from the list."""
+    tuple_list: list[T | None] = [None] * n
+    i = 0
+    for current in xs:
+        tuple_list[i] = current
+        i = (i + 1) % n
+        if i == 0:
+            if leading_nulls == 1 and tuple_list[n - 1] is None:
+                yield tuple(tuple_list)
+            else:
+                yield tuple(tuple_list)
+    if trailing_nulls == 1 and tuple_list[n - 1] is not None:
+        yield tuple(tuple_list)
+
 def make_pairs(
     xs: Generator[T, None, None],
     leading_nulls: int = 0,
-    trailing_nulls: int = 0,
-) -> Generator[tuple[T | None, T | None], None, None]:
-    """Create pairs of elements from the list."""
-    xs = iter(xs)
-    try:
-        previous: T = next(xs)
-        if leading_nulls == 1:
-            yield (None, previous)
-        for current in xs:
-            yield (previous, current)
-            previous = current
-        if trailing_nulls == 1:
-            yield (previous, None)
-    except StopIteration:
-        pass
+    trailing_nulls: int = 0):
+    return make_tuples(xs, 2, leading_nulls, trailing_nulls)
 
-
+# def make_pairs(
+#     xs: Generator[T, None, None],
+#     leading_nulls: int = 0,
+#     trailing_nulls: int = 0,
+# ) -> Generator[tuple[T | None, T | None], None, None]:
+#     """Create pairs of elements from the list."""
+#     xs = iter(xs)
+#     try:
+#         previous: T = next(xs)
+#         if leading_nulls == 1:
+#             yield (None, previous)
+#         for current in xs:
+#             yield (previous, current)
+#             previous = current
+#         if trailing_nulls == 1:
+#             yield (previous, None)
+#     except StopIteration:
+#         pass
 def make_triplets(
     xs: Generator[T, None, None],
 ) -> Generator[tuple[T, T | None, T | None], None, None]:
