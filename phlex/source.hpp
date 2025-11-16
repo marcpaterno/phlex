@@ -1,7 +1,7 @@
 #ifndef PHLEX_SOURCE_HPP
 #define PHLEX_SOURCE_HPP
 
-#include "boost/dll/alias.hpp"
+#include "phlex_int_export.hpp"
 
 #include "phlex/configuration.hpp"
 #include "phlex/core/fwd.hpp"
@@ -64,6 +64,14 @@ namespace phlex::experimental::detail {
 }
 
 #define PHLEX_EXPERIMENTAL_REGISTER_SOURCE(source)                                                 \
-  BOOST_DLL_ALIAS(phlex::experimental::detail::create_next<source>, create_source)
+  extern "C" {                                                                                     \
+  phlex_int_EXPORT phlex::experimental::detail::next_store_t create_source(                           \
+    phlex::experimental::configuration const&);                                                    \
+  }                                                                                                \
+  phlex::experimental::detail::next_store_t create_source(                                         \
+    phlex::experimental::configuration const& config)                                              \
+  {                                                                                                \
+    return phlex::experimental::detail::create_next<source>(config);                               \
+  }
 
 #endif // PHLEX_SOURCE_HPP
